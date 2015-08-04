@@ -23,7 +23,7 @@ class ConvergenceMonitor(object):
     Parameters
     ----------
     thresh : double
-        Convergence threshold. The algorithm has convereged eitehr if
+        Convergence threshold. The algorithm has convereged either if
         the maximum number of iterations is reached or the log probability
         improvement between the two consecutive iterations is less than
         threshold.

@@ -147,6 +147,37 @@ class GaussianHMM(_BaseHMM):
 
     covars_ = property(_get_covars, _set_covars)
 
+    def _set_free_parameters(self):
+
+        ## number of free parameters in the transition matrix
+        ## is the square of the number of states
+        n_transmat = self.n_components**2.
+
+        ## number of free parameters in the starting probabilities
+        ## is just the number of states
+        n_startprob = self.n_components
+
+        ## the number of free parameters in the Gaussian means
+        ## is the number of features times the number of states
+        n_means = np.size(self.means_)
+
+        ## the number of free parameters in the covariance
+        ## depends on the type of covariance:
+        if self.covariance_type == "diag":
+            n_covars = self.n_components*self.n_features
+        elif self.covariance_type == "spherical":
+            n_covars = self.n_components
+        elif self.covariance_type == "tied":
+            n_covars = self.n_features*(self.n_features-1)/2.
+        elif self.covariance_type == "full":
+            n_covars = self.n_components*self.n_features*(self.n_features-1)/2.
+        else:
+            raise ValueError('covariance_type must be one of {0}'
+                             .format(COVARIANCE_TYPES))
+
+        self.free_parameters = n_transmat+n_startprob+n_means+n_covars
+        return
+
     def _check(self):
         super(GaussianHMM, self)._check()
 
@@ -388,6 +419,23 @@ class MultinomialHMM(_BaseHMM):
             self.emissionprob_ = self.random_state \
                 .rand(self.n_components, self.n_features)
             normalize(self.emissionprob_, axis=1)
+
+    def _set_free_parameters(self):
+
+        ## number of free parameters in the transition matrix
+        ## is the square of the number of states
+        n_transmat = self.n_components**2.
+
+        ## number of free parameters in the starting probabilities
+        ## is just the number of states
+        n_startprob = self.n_components
+
+        ## emission probabilities
+        n_emissionprob = np.size(self.emissionprob_)
+
+        ## add all free parameters together
+        self.free_parameters = n_transmat+n_startprob+n_emissionprob
+
 
     def _check(self):
         super(MultinomialHMM, self)._check()
