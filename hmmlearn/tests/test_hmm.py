@@ -537,6 +537,45 @@ class GMMHMMTestMixin(object):
         h.fit(X, lengths=lengths)
 
 
+    def test_set_parameters(self):
+        h = hmm.GMMHMM(self.n_components, n_mix=self.n_mix, covars_prior=1.0)
+        h.startprob_ = self.startprob
+        h.transmat_ = normalize(
+            self.transmat + np.diag(self.prng.rand(self.n_components)), 1)
+        h.gmms_ = self.gmms
+
+        lengths = [10] * 10
+        X, _state_sequence = h.sample(sum(lengths), random_state=self.prng)
+
+        print("X.shape: " + str(X.shape))
+        # Mess up the parameters and see if we can re-learn them.
+        h.n_iter = 0
+        h.fit(X, lengths=lengths)
+        h._set_free_parameters()
+        n_components = self.n_components
+        n_features = self.n_features
+        n_mix = self.n_mix
+
+        n_prior = n_components
+        n_transition = n_components**2.
+        n_means = n_components*n_features*n_mix
+
+        if self.covariance_type == "diag":
+            n_covars = n_components*n_features*n_mix
+        elif self.covariance_type == "spherical":
+            n_covars = n_components*n_mix
+        elif self.covariance_type == "tied":
+            n_covars = n_components*n_features*(n_features-1)/2.
+        elif self.covariance_type == "full":
+            n_covars = n_components*n_mix*n_features*(n_features-1)/2.
+        else:
+            raise Exception("Covariance type not recognized!")
+
+        n_parameters = n_prior + n_transition + n_means + n_covars
+        self.assertEqual(n_parameters, h.free_parameters)
+
+
+
 class TestGMMHMMWithDiagCovars(GMMHMMTestMixin, TestCase):
     covariance_type = 'diag'
 

@@ -674,3 +674,46 @@ class GMMHMM(_BaseHMM):
                         g.covars_ = ((stats['covars'][state]
                                      + self.covars_prior * eye[np.newaxis])
                                      / cvnorm)
+
+    def _set_free_parameters(self):
+
+        ## number of free parameters in the transition matrix
+        ## is the square of the number of states
+        n_transmat = self.n_components**2.
+
+        ## number of free parameters in the starting probabilities
+        ## is just the number of states
+        n_startprob = self.n_components
+
+        ## the number of free parameters in the Gaussian means
+        ## is the number of features times the number of states
+        n_features = self.gmms_[0].means_.shape[1]
+
+        print("n_components in set_free_parameters %i"%self.n_components)
+        print("n_features in set_free_parameters %i"%n_features)
+        print("n_mix in set_free_parameters %i"%self.n_mix)
+
+        print("n_transmat should be n_components**2: %i"%n_transmat)
+        print("n_startprob should be n_components: %i"%n_startprob)
+
+        n_means = self.n_components*n_features*self.n_mix
+
+        print("n_means: " + str(n_means))
+
+        ## the number of free parameters in the covariance
+        ## depends on the type of covariance:
+        if self.covariance_type == "diag":
+            n_covars = self.n_components*n_features*self.n_mix
+        elif self.covariance_type == "spherical":
+            n_covars = self.n_components*self.n_mix
+        elif self.covariance_type == "tied":
+            n_covars = self.n_components*n_features*(n_features-1)/2.
+        elif self.covariance_type == "full":
+            n_covars = self.n_components*self.n_mix*n_features*(n_features-1)/2.
+        else:
+            raise ValueError('covariance_type must be one of {0}'
+                             .format(COVARIANCE_TYPES))
+
+        print("n_covars: " + str(n_covars))
+        self.free_parameters = n_transmat+n_startprob+n_means+n_covars
+        return
