@@ -248,8 +248,26 @@ class _BaseHMM(BaseEstimator):
         ## compute free parameters
         self._set_free_parameters()
 
-        ## compute BIC:
+        ## compute log-likelihood:
+        loglike = self.score(X)
 
+        ## compute BIC:
+        bayes_ic = -2.*loglike + self.free_parameters*np.log(X.shape[0])
+        return bayes_ic
+
+    def aic(self, X):
+        check_is_fitted(self, "startprob_")
+        self._check()
+
+        ## compute free parameters
+        self._set_free_parameters()
+
+        ## compute log-likelihood:
+        loglike = self.score(X)
+
+        ## compute AIC:
+        akaike_ic = 2.*self.free_parameters-2.*loglike
+        return akaike_ic
 
 
     def _decode_viterbi(self, X):
