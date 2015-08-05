@@ -50,10 +50,11 @@ setup_options = dict(
     maintainer_email=MAINTAINER_EMAIL,
     license=LICENSE,
     url="https://github.com/hmmlearn/hmmlearn",
-    packages=["hmmlearn"],
+    packages=["hmmlearn", "hmmlearn.tests"],
     classifiers=CLASSIFIERS,
     ext_modules=[
-        Extension("hmmlearn._hmmc", ["hmmlearn/_hmmc.c"])
+        Extension("hmmlearn._hmmc", ["hmmlearn/_hmmc.c"],
+                  extra_compile_args=["-O3"])
     ],
     requires=["sklearn"]
 )
