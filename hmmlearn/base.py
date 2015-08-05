@@ -241,6 +241,17 @@ class _BaseHMM(BaseEstimator):
             logprob += logprobij
         return logprob
 
+    def bic(self, X):
+        check_is_fitted(self, "startprob_")
+        self._check()
+
+        ## compute free parameters
+        self._set_free_parameters()
+
+        ## compute BIC:
+
+
+
     def _decode_viterbi(self, X):
         framelogprob = self._compute_log_likelihood(X)
         return self._do_viterbi_pass(framelogprob)

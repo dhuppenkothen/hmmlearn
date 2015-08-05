@@ -208,6 +208,44 @@ class GaussianHMMTestMixin(object):
         # TODO: write the actual test
 
 
+    def test_set_parameters(self):
+        h = hmm.GaussianHMM(self.n_components, self.covariance_type)
+        h.startprob_ = self.startprob
+        h.transmat_ = normalize(
+            self.transmat + np.diag(self.prng.rand(self.n_components)), 1)
+        h.means_ = 20 * self.means
+        h.covars_ = self.covars[self.covariance_type]
+
+        lengths = [10] * 10
+        X, _state_sequence = h.sample(sum(lengths), random_state=self.prng)
+
+        # Mess up the parameters and see if we can re-learn them.
+        h.n_iter = 0
+        h.fit(X, lengths=lengths)
+
+        h._set_free_parameters()
+        n_components = self.n_components
+        n_features = self.n_features
+
+        n_prior = n_components
+        n_transition = n_components**2.
+        n_means = n_components*n_features
+        if self.covariance_type == "diag":
+            n_covars = n_components*n_features
+        elif self.covariance_type == "spherical":
+            n_covars = n_components
+        elif self.covariance_type == "tied":
+            n_covars = n_features*(n_features-1)/2.
+        elif self.covariance_type == "full":
+            n_covars = n_components*n_features*(n_features-1)/2.
+        else:
+            raise Exception("Covariance type not recognized!")
+
+        n_parameters = n_prior + n_transition + n_means + n_covars
+        self.assertEqual(n_parameters, h.free_parameters)
+
+        return
+
 class TestGaussianHMMWithSphericalCovars(GaussianHMMTestMixin, TestCase):
     covariance_type = 'spherical'
 
@@ -369,6 +407,23 @@ class MultinomialHMMTestCase(TestCase):
         self.assertFalse(self.h._check_input_symbols([[0]]))
         self.assertFalse(self.h._check_input_symbols([[0., 2., 1., 3.]]))
         self.assertFalse(self.h._check_input_symbols([[0, 0, -2, 1, 3, 1, 1]]))
+
+
+    def test_set_parameters(self):
+        h = self.h
+        h._set_free_parameters()
+        n_components = self.n_components
+        n_features = self.n_features
+
+        n_prior = n_components
+        n_transition = n_components**2.
+        n_emissions = n_components*n_features
+        n_parameters = n_prior + n_transition + n_emissions
+        self.assertEqual(n_parameters, h.free_parameters)
+
+        return
+
+
 
 
 def create_random_gmm(n_mix, n_features, covariance_type, prng=0):
