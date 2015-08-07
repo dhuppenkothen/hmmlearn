@@ -241,7 +241,7 @@ class _BaseHMM(BaseEstimator):
             logprob += logprobij
         return logprob
 
-    def bic(self, X):
+    def bic(self, X, lengths=None):
         check_is_fitted(self, "startprob_")
         self._check()
 
@@ -249,13 +249,13 @@ class _BaseHMM(BaseEstimator):
         self._set_free_parameters()
 
         ## compute log-likelihood:
-        loglike = self.score(X)
+        loglike = self.score(X, lengths=lengths)
 
         ## compute BIC:
         bayes_ic = -2.*loglike + self.free_parameters*np.log(X.shape[0])
         return bayes_ic
 
-    def aic(self, X):
+    def aic(self, X, lengths=None):
         check_is_fitted(self, "startprob_")
         self._check()
 
@@ -263,7 +263,7 @@ class _BaseHMM(BaseEstimator):
         self._set_free_parameters()
 
         ## compute log-likelihood:
-        loglike = self.score(X)
+        loglike = self.score(X, lengths=lengths)
 
         ## compute AIC:
         akaike_ic = 2.*self.free_parameters-2.*loglike
