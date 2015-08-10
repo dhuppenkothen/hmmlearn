@@ -689,16 +689,7 @@ class GMMHMM(_BaseHMM):
         ## is the number of features times the number of states
         n_features = self.gmms_[0].means_.shape[1]
 
-        print("n_components in set_free_parameters %i"%self.n_components)
-        print("n_features in set_free_parameters %i"%n_features)
-        print("n_mix in set_free_parameters %i"%self.n_mix)
-
-        print("n_transmat should be n_components**2: %i"%n_transmat)
-        print("n_startprob should be n_components: %i"%n_startprob)
-
         n_means = self.n_components*n_features*self.n_mix
-
-        print("n_means: " + str(n_means))
 
         ## the number of free parameters in the covariance
         ## depends on the type of covariance:
@@ -714,6 +705,5 @@ class GMMHMM(_BaseHMM):
             raise ValueError('covariance_type must be one of {0}'
                              .format(COVARIANCE_TYPES))
 
-        print("n_covars: " + str(n_covars))
         self.free_parameters = n_transmat+n_startprob+n_means+n_covars
         return
